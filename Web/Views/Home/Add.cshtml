@@ -1,0 +1,125 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+<form id="form">
+    <div class="row">
+        <div class="col-sm-12 justify-content-end">
+            <input class="btn btn-success" id="AddForm" value="Thêm câu hỏi" />
+        </div>
+    </div>
+    <div class="form-group" id="FormDefault" data-radioGroup="0">
+        <label for="">Câu hỏi</label>
+        <div class="dvQuestion">
+            <input type="text" class="form-control" name="Question" placeholder="Viết câu hỏi" />
+        </div>
+
+        <div class="Answer">
+            <div class="dvAnswer">
+                <input type="radio" class="radio" name="radioAnswer-0">
+                <input type="text" class="form-control" name="Answer" value="">
+                <input type="button" class="btn btn-success btnAddAnswer" onclick="AddNewAnswer(event)"
+                    value="Thêm câu trả lời">
+            </div>
+        </div>
+    </div>
+
+</form>
+<input type="button" class="btn btn-primary" onclick="SaveQuiz(event)" value="Lưu">
+
+@section scripts{
+    <script>
+        var count = 1;
+        $(document).ready(function () {
+            $("#AddForm").on("click", function (e) {
+                e.preventDefault();
+                var patternForm = `
+                                <div class="form-group" id="FormDefault" data-radioGroup=${count}>
+                                    <label for="">Câu hỏi</label>
+                                    <div class="dvQuestion">
+                                        <input type="text" class="form-control" name="Question" placeholder="Viết câu hỏi" />
+                                        <input type="button" class="btn btn-warning" value="Xóa câu hỏi" onclick="RemoveQuestion(event)">
+                                    </div>
+                                    <div class="Answer">
+                                        <div class="dvAnswer">
+                                                <input type="radio" class="radio" name="radioAnswer-${count}">
+                                            <input type="text" class="form-control" name="Answer" value="">
+                                            <input type="button" class="btn btn-success btnAddAnswer" onclick="AddNewAnswer(event)"
+                                            value="Thêm câu trả lời">
+                                        </div>
+                                    </div>
+                                </div>
+                                                     `;
+                $("#form").append(patternForm);
+                count++;
+            })
+        })
+
+        function AddNewAnswer(e) {
+            e.preventDefault();
+            var radioGroupNumber = $(e.currentTarget).closest(".form-group").data("radiogroup");
+            console.log(radioGroupNumber);
+            var patternAnswer = `
+                                        <div class="dvAnswer">
+                                            <input type="radio" class="radio" name="radioAnswer-${radioGroupNumber}">
+                                            <input type="text" class="form-control" name="Answer" value="">
+                                            <input type="button" class="btn-RemoveAnswer btn btn-warning" onclick="RemoveNewAnswer(event)"
+                                            value="Xóa câu trả lời">
+                                        </div>
+                                                     `;
+            var el = $(e.currentTarget).closest(".Answer");
+            el.append(patternAnswer);
+        }
+
+        function RemoveNewAnswer(e) {
+            e.preventDefault();
+            $(e.currentTarget).closest(".dvAnswer").remove();
+        }
+
+        function RemoveQuestion(e) {
+            e.preventDefault();
+            $(e.currentTarget).closest('.form-group').remove();
+        }
+
+        function SaveQuiz(e) {
+            e.preventDefault();
+            var lstQuestion = [];
+            var lstForm = $("#form .form-group");
+            lstForm.each(function (index, el) {
+                var objQuestion = new Object();
+                var titleQuestion = $(el).find(`input[name="Question"]`).val();
+                objQuestion.Title = titleQuestion;
+                objQuestion.Answers = [];
+                $(el).find(".dvAnswer").each(function (index, el) {
+                    var objAnswer = new Object();
+                    var titleAnswer = $(el).find(`input[name="Answer"]`).val();
+                    var radioChecked = $(el).find(`input[name^="radioAnswer-"]:checked`).val() == "on" ? true : false;
+                    objAnswer.Title = titleAnswer;
+                    objAnswer.IsCorrect = radioChecked;
+                    objQuestion.Answers.push(objAnswer);
+                })
+                lstQuestion.push(objQuestion);
+            })
+
+            var QuizObj = new Object();
+            QuizObj.Questions = lstQuestion;
+            console.log(QuizObj);
+
+            $.ajax({
+                type: "POST",
+                url: "/Home/Create",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(QuizObj),
+                success: function (data) {
+                    if (data == "OK") {
+                        document.location.href = "/";
+                    }
+                },
+                error: function (message) {
+                    cosole.log(message);
+                }
+            })
+        }
+    </script>
+}

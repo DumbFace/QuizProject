@@ -1,0 +1,65 @@
+@model Quiz
+
+
+@{
+    string result = "";
+}
+
+<h1>Bài kiểm tra @Model.Url</h1>
+
+@if (Model.Questions.Count > 0)
+{
+    int count = 1;
+    @foreach (var question in Model.Questions)
+    {
+        <div class="question">
+            <span>Câu @(count): @question.Title </span>
+
+        </div>
+        <div class="lstAnswer">
+            @foreach (var answer in question.Answers)
+            {
+                <span @(answer.IsCorrect == true ? "data-correct=true" : "data-correct=false")>@answer.Title</span>
+                if (answer.IsCorrect)
+                {
+                    result = answer.Title;
+                }
+            }
+
+            <div class="result">
+                <h5>Kết quả là @result</h5>
+            </div>
+        </div>
+
+        count++;
+    }
+}
+
+
+
+@section scripts {
+    <script>
+        $(".lstAnswer span").on("click", function (e) {
+            var currentEl = $(e.currentTarget).data("correct");
+            $(e.currentTarget).closest(".lstAnswer").find("span").css("background-color", "red");
+            $(e.currentTarget).closest(".lstAnswer").find("span[data-correct='true']").css("background-color", "green");
+            $(e.currentTarget).css("background-color", "red");
+
+            if (currentEl == true) {
+                $(e.currentTarget).css("background", "green");
+            }
+            else {
+                $(e.currentTarget).css("background", "#c7c7c7");
+            }
+            $(e.currentTarget).closest(".lstAnswer").find(".result").css("display", "block");
+            $(e.currentTarget).closest(".lstAnswer").css("pointer-events","none");
+
+        @* #c7c7c7; *@
+        @* if (result == true)
+            {
+            alert("Answer correct!");
+            } *@
+        @* alert(result); *@
+                                        })
+    </script>
+}

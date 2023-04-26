@@ -1,0 +1,74 @@
+@model IEnumerable<Quiz>
+
+@{
+    int count = 1;
+}
+<h1>Danh sách câu đố</h1>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Thứ Tự</th>
+                        <th>Tên Quiz</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@count</td>
+                            <td>
+                                <a href="/Home/Excercise?url=@item.Url">
+                                    @item.Url
+                                </a>
+                            </td>
+                            <td>
+                                <div class="navigation">
+                                    <a onclick="Edit(@item.Id)" class="btn btn-success">
+                                        <i class="fa fa-pencil"></i>
+                                    </a>
+
+                                    <a onclick="Delete(@item.Id)" class="btn btn-danger">
+                                        <i class="fa fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        count++;
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script>
+        function Edit(id) {
+            document.location.href = `/Home/Edit?id=${id}`;
+        @* alert(`Edit ${id}`); *@
+            }
+
+        function Delete(id) {
+            $.ajax({
+                type: "GET",
+                url: `/Home/Delete?id=${id}`,
+                success: function (result) {
+                    if (result == "OK") {
+                        document.location.href = "/Home/Get";
+                    }
+                },
+                onerror: function (mes) {
+                    console.log(mes);
+                }
+            })
+        }
+    </script>
+
+
+}
